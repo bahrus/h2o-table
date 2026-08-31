@@ -4,11 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "node ./node_modules/spa-ssi/serve.js",
+    "test": "playwright test",
+    "update": "ncu -u && npm install",
+    "safari": "npx playwright wk http://localhost:8000",
+    "chrome": "npx playwright cr http://localhost:8000"
+  },
+  "devDependencies": {
+    "assign-gingerly": "0.0.91",
+    "@playwright/test": "1.62.1",
+    "spa-ssi": "0.0.27"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bahrus/h2o-table.git"
+  },
+  "dependencies": {
+    "assign-gingerly": "0.0.91"
   },
   "author": "",
   "license": "MIT",
