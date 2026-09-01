@@ -21,6 +21,13 @@ import {extractData} from './extractData.js';
  * el.h2oTable.data; // DataRecord[] — re-scraped from the DOM on every read
  * ```
  *
+ * Subclasses can post-process the scraped rows by overriding
+ * {@link H2OTable#massageData} (e.g. to add computed columns) without touching
+ * the scraping logic. Inject the subclass via `assignFeatures`:
+ * ```js
+ * h2oTable: { spawn: 'my-element/MyH2OTable.js', customData: { itemprops: [...] } }
+ * ```
+ *
  * @implements {IH2OTable}
  */
 export class H2OTable{
@@ -41,11 +48,12 @@ export class H2OTable{
 
     /**
      * The host's `[itemscope]` rows projected onto {@link DataRecord}s using
-     * {@link H2OTable#itemprops}. Re-scraped from the DOM on every read.
+     * {@link H2OTable#itemprops}, then passed through {@link H2OTable#massageData}.
+     * Re-scraped from the DOM on every read.
      * @returns {DataRecord[]}
      */
     get data(){
-        return extractData(this.hostElement, this.#itemprops);
+        return this.massageData(extractData(this.hostElement, this.#itemprops));
     }
 
     /**
@@ -53,6 +61,26 @@ export class H2OTable{
      * @type {string[]}
      */
     #itemprops;
+
+    /**
+     * The configured `itemprop` names, in order. Exposed for subclasses /
+     * consumers that need to know which columns were scraped.
+     * @returns {string[]}
+     */
+    get itemprops(){
+        return this.#itemprops;
+    }
+
+    /**
+     * Post-process hook, called by {@link H2OTable#data} with the freshly
+     * scraped rows. The base implementation is the identity function; override
+     * it in a subclass to add computed columns, filter, sort, etc.
+     * @param {DataRecord[]} data - the scraped rows, one per `[itemscope]`
+     * @returns {DataRecord[]} the rows to expose as `h2oTable.data`
+     */
+    massageData(data){
+        return data;
+    }
 
     /**
      * @param {HTMLElement} hostElement - the custom element this feature is attached to
